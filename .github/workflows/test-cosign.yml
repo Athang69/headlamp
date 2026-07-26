@@ -16,14 +16,16 @@ jobs:
         run: |
           echo "test content" > test.txt
           cosign sign-blob --yes \
-            --bundle test.txt.sigstore.json \
+            --new-bundle-format=false \
+            --output-signature test.txt.sig \
+            --output-certificate test.txt.pem \
             test.txt
 
       - name: Verify it against Rekor
         run: |
           cosign verify-blob \
-            --bundle test.txt.sigstore.json \
-            --new-bundle-format \
             --certificate-identity-regexp "^https://github.com/${{ github.repository }}/" \
             --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+            --signature test.txt.sig \
+            --certificate test.txt.pem \
             test.txt
