@@ -16,6 +16,7 @@ jobs:
         run: |
           echo "test content" > test.txt
           cosign sign-blob --yes \
+            --new-bundle-format=false \
             --output-signature test.txt.sig \
             --output-certificate test.txt.pem \
             test.txt
