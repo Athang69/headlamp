@@ -1,0 +1,30 @@
+name: Test Cosign Keyless
+on: workflow_dispatch
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      - name: Sign a test file
+        run: |
+          echo "test content" > test.txt
+          cosign sign-blob --yes \
+            --output-signature test.txt.sig \
+            --output-certificate test.txt.pem \
+            test.txt
+
+      - name: Verify it against Rekor
+        run: |
+          cosign verify-blob \
+            --certificate-identity-regexp "^https://github.com/${{ github.repository }}/" \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+            --signature test.txt.sig \
+            --certificate test.txt.pem \
+            test.txt
